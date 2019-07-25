@@ -1,3 +1,9 @@
+import os
+import apiai
+import sys
+import json
+import requests
+
 from flask import Flask, request, abort, send_file
 
 from linebot import (
@@ -8,48 +14,49 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
-import os.path
-import sys
-import json
-import requests
-
-try:
-    import apiai
-except ImportError:
-    sys.path.append(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
-    )
-    import apiai
-
-DIALOGFLOW_CLIENT_ACCESS_TOKEN = '15838659c7bd49d793ae9b00c9ab2c4b' #dialogflow的
-
+# DIALOGFLOW_CLIENT_ACCESS_TOKEN = '15838659c7bd49d793ae9b00c9ab2c4b' 
 app = Flask(__name__)
 
 # Channel Access Token
 line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
 # Channel Secret
 handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
-ai = apiai.ApiAI('15838659c7bd49d793ae9b00c9ab2c4b')
 
+def dialog_detect(say):
+    ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
+ 
+    request = ai.text_request()
+ 
+    request.lang = 'tw'  # optional, default value equal 'en'
+ 
+    request.query = say
+    response = request.getresponse().read().decode()
+    result=json.loads(response)
 
-# 監聽所有來自 /callback 的 Post Request
-@app.route("/callback", methods=['POST'])
-def callback():
-    # print("into callback")
-    # get X-Line-Signature header value
-    signature = request.headers['X-Line-Signature']
-    # get request body as text
-    body = request.get_data(as_text=True)
-    print(body)
-    print("\n")
-    app.logger.info("Request body: " + body)
-    # print("\n\nbody : " + body + "\nsignature : " + signature + "\n\n")
-    # handle webhook body
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
-    return 'OK'
+# ai = apiai.ApiAI('15838659c7bd49d793ae9b00c9ab2c4b')
+
+# @app.route('/')
+# def index():
+#     return "<p>Hello World!</p>"
+
+# # 監聽所有來自 /callback 的 Post Request
+# @app.route("/callback", methods=['POST'])
+# def callback():
+#     # print("into callback")
+#     # get X-Line-Signature header value
+#     signature = request.headers['X-Line-Signature']
+#     # get request body as text
+#     body = request.get_data(as_text=True)
+#     # print(body)
+#     # print("\n")
+#     app.logger.info("Request body: " + body)
+#     # print("\n\nbody : " + body + "\nsignature : " + signature + "\n\n")
+#     # handle webhook body
+#     try:
+#         handler.handle(body, signature)
+#     except InvalidSignatureError:
+#         abort(400)
+#     return 'OK'
 
 
 # @handler.add(MessageEvent)
@@ -115,5 +122,4 @@ def callback():
 
 
 if __name__ == "__main__":
-    # port = int(os.environ.get('PORT', 5000))
     app.run(debug = True, port = 80)
