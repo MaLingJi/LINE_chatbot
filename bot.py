@@ -54,7 +54,7 @@ def makeWebhookResult(req):
     zone = parameters.get("applywhat")
     #先設定一個回應
     #如果是Taipei,cost的位置就回營18
-    cost = {'獎學金':'獎學金', '清寒證明':'清寒證明', '低收入戶證明':'低收入戶證明2'}
+    cost = {'獎學金':'獎學金', '清寒證明':'清寒證明', '低收入戶證明':'低收入戶證明'}
     #speech就是回應的內容
     speech = str(cost[zone]) + "申請完成!"
     print("Response:")
