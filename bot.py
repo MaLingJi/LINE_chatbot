@@ -3,8 +3,9 @@ import apiai
 import sys
 import json
 import requests
+import urllib
 
-from flask import Flask, request, abort, send_file
+from flask import Flask, request, abort, send_file, make_response
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -22,22 +23,50 @@ line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFG
 # Channel Secret
 handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
 
-def dialog_detect(say):
-    ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
- 
-    request = ai.text_request()
- 
-    request.lang = 'tw'  # optional, default value equal 'en'
- 
-    request.query = say
-    response = request.getresponse().read().decode()
-    result=json.loads(response)
-
 # ai = apiai.ApiAI('15838659c7bd49d793ae9b00c9ab2c4b')
 
-# @app.route('/')
-# def index():
-#     return "<p>Hello World!</p>"
+@app.route('/')
+def index():
+    return "Hello World!"
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    req = request.get_json(silent=True, force=True)
+    print("Request:")
+    print(json.dumps(req, indent=4))
+
+    res = makeWebhookResult(req)
+
+    res = json.dumps(res, indent=4)
+    print(res)
+    r = make_response(res)
+    r.headers['Content-Type'] = 'application/json'
+    return r
+
+def makeWebhookResult(req):
+    #askweather的地方是Dialogflow>Intent>Action 取名的內容
+    if req.get("result").get("action") != "apply":
+        return {}
+    result = req.get("result")
+    parameters = result.get("parameters")
+    #parameters.get("weatherlocation")的weatherlocation是Dialogflow > Entitiy
+    #也就是步驟josn格式中parameters>weatherlocation
+    zone = parameters.get("applywhat")
+    #先設定一個回應
+    #如果是Taipei,cost的位置就回營18
+    cost = {'獎學金':'獎學金', '清寒證明':'清寒證明'}
+    #speech就是回應的內容
+    speech = str(cost[zone]) + "申請完成!"
+    print("Response:")
+    print(speech)
+    #回傳
+    return {
+        "speech": speech,
+        "displayText": speech,
+        #"data": {},
+        #"contextOut": [],
+        "source": "agent"
+    }
 
 # # 監聽所有來自 /callback 的 Post Request
 # @app.route("/callback", methods=['POST'])
