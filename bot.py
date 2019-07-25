@@ -1,9 +1,9 @@
 import os
-import apiai
 import sys
 import json
 import requests
 import urllib
+import dialogflow_v2 as dialogflow
 
 from flask import Flask, request, abort, send_file, make_response
 
@@ -15,78 +15,62 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
-# DIALOGFLOW_CLIENT_ACCESS_TOKEN = '15838659c7bd49d793ae9b00c9ab2c4b' 
+# ===== dialog config
+project_id = 'test-wciryd'
+session_id = 0
+language_code = 'zh-tw'
+#======
+
 app = Flask(__name__)
 
-# Channel Access Token
-# line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
-# Channel Secret
-# handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
+#Channel Access Token
+line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
+#Channel Secret
+handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
 
-# ai = apiai.ApiAI('15838659c7bd49d793ae9b00c9ab2c4b')
+# def detect_intent_texts(project_id, session_id, texts, language_code):
+#     session_client = dialogflow.SessionsClient()
+#     session = session_client.session_path(project_id, session_id)
+#     for text in texts:
+#         text_input = dialogflow.types.TextInput(text=texts, language_code=language_code)
+#         query_input = dialogflow.types.QueryInput(text=text_input)
+#         response = session_client.detect_intent(session=session, query_input=query_input)
+#         print(response.query_result.query_text)
+#         return response.query_result.fulfillment_text
 
 @app.route("/", methods=['GET'])
 def hello():
     return "Hello World!"
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    req = request.get_json(silent=True, force=True)
-    print("Request:")
-    print(json.dumps(req, indent=4))
+ # 監聽所有來自 /callback 的 Post Request
+@app.route("/callback", methods=['POST'])
+def callback():
+    # print("into callback")
+    # get X-Line-Signature header value
+    signature = request.headers['X-Line-Signature']
+    # get request body as text
+    body = request.get_data(as_text=True)
+    # print(body)
+    # print("\n")
+    app.logger.info("Request body: " + body)
+    # print("\n\nbody : " + body + "\nsignature : " + signature + "\n\n")
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+    return 'OK'
 
-    res = makeWebhookResult(req)
 
-    res = json.dumps(res, indent=4)
-    print(res)
-    r = make_response(res)
-    r.headers['Content-Type'] = 'application/json'
-    return r
-
-def makeWebhookResult(req):
-    #askweather的地方是Dialogflow>Intent>Action 取名的內容
-    if req.get("result").get("action") != "apply":
-        return {}
-    result = req.get("result")
-    parameters = result.get("parameters")
-    #parameters.get("weatherlocation")的weatherlocation是Dialogflow > Entitiy
-    #也就是步驟josn格式中parameters>weatherlocation
-    zone = parameters.get("applywhat")
-    #先設定一個回應
-    #如果是Taipei,cost的位置就回營18
-    cost = {'獎學金': '獎學金', '清寒證明': '清寒證明', '低收入戶證明': '低收入戶證明', 'text': 'text'}
-    #speech就是回應的內容
-    speech = str(cost[zone]) + "申請完成!"
-    print("Response:")
-    print(speech)
-    #回傳
-    return {
-        "speech": speech,
-        "displayText": speech,
-        #"data": {},
-        #"contextOut": [],
-        "source": "agent"
-    }
-
-# # 監聽所有來自 /callback 的 Post Request
-# @app.route("/callback", methods=['POST'])
-# def callback():
-#     # print("into callback")
-#     # get X-Line-Signature header value
-#     signature = request.headers['X-Line-Signature']
-#     # get request body as text
-#     body = request.get_data(as_text=True)
-#     # print(body)
-#     # print("\n")
-#     app.logger.info("Request body: " + body)
-#     # print("\n\nbody : " + body + "\nsignature : " + signature + "\n\n")
-#     # handle webhook body
-#     try:
-#         handler.handle(body, signature)
-#     except InvalidSignatureError:
-#         abort(400)
-#     return 'OK'
-
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    # Response = detect_intent_texts(project_id, session_id, str(texts), language_code)
+    msg = event.message.text
+    # print(type(msg))
+    msg = msg.encode('utf-8') 
+    
+    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.message.text))
+    # print(event.message.text)
 
 # @handler.add(MessageEvent)
 # def hello(event):

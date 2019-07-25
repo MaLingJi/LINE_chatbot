@@ -5,7 +5,7 @@ import dialogflow_v2 as dialogflow
 
 
 # ===== dialog config
-project_id = 'leechangbo-kxupab'
+project_id = 'test-wciryd'
 session_id = 0
 language_code = 'zh-tw'
 #======
@@ -21,11 +21,9 @@ def detect_intent_texts(project_id, session_id, texts, language_code):
         print(response.query_result.query_text)
         return response.query_result.fulfillment_text
 
-
-
-
 if __name__ == "__main__":
     while 1:
-        texts=input("")
+        texts="颱風資訊"
+        #print(texts)
         Response=detect_intent_texts(project_id, session_id, str(texts), language_code)
-        print(Response)    
+        print(Response)
