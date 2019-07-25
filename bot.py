@@ -19,14 +19,14 @@ from linebot.models import *
 app = Flask(__name__)
 
 # Channel Access Token
-line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
+# line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
 # Channel Secret
-handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
+# handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
 
 # ai = apiai.ApiAI('15838659c7bd49d793ae9b00c9ab2c4b')
 
-@app.route('/')
-def index():
+@app.route("/", methods=['GET'])
+def hello():
     return "Hello World!"
 
 @app.route('/webhook', methods=['POST'])
@@ -54,7 +54,7 @@ def makeWebhookResult(req):
     zone = parameters.get("applywhat")
     #先設定一個回應
     #如果是Taipei,cost的位置就回營18
-    cost = {'獎學金': '獎學金', '清寒證明': '清寒證明', '低收入戶證明': '低收入戶證明'}
+    cost = {'獎學金': '獎學金', '清寒證明': '清寒證明', '低收入戶證明': '低收入戶證明', 'text': 'text'}
     #speech就是回應的內容
     speech = str(cost[zone]) + "申請完成!"
     print("Response:")
