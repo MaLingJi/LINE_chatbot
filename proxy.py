@@ -24,6 +24,5 @@ def detect_intent_texts(project_id, session_id, texts, language_code):
 if __name__ == "__main__":
     while 1:
         texts="颱風資訊"
-        #print(texts)
         Response=detect_intent_texts(project_id, session_id, str(texts), language_code)
         print(Response)
