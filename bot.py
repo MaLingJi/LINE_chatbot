@@ -16,17 +16,18 @@ from linebot.exceptions import (
 from linebot.models import *
 
 # ===== dialog config
-project_id = 'test-wciryd'
-session_id = 0
-language_code = 'zh-tw'
+# project_id = 'test-wciryd'
+# session_id = 0
+# language_code = 'zh-tw'
 #======
 
 app = Flask(__name__)
 
 #Channel Access Token
-line_bot_api = LineBotApi('1G23hDKeaHReGjaM9quXdjuyTLs6tTN43YvimfTxeuWSEHqRenOFGh43U0UVZftawXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31Tr46wwvYkh+NimiQtABBfTwHPJoxym3mVqmJl0AqSy9bAdB04t89/1O/w1cDnyilFU=')
+line_bot_api = LineBotApi('KTr8i7x47eLVEjJAb+bs0Vuyrvc8S+5CwxaiFfueaMz1dqHHIdJF3lOz+oPe9ueiwXIYGAqdx4fWrQ7jz4bEnxDrVzod4pq5WQ27C7F31TpdVADiwMu89j5XEuSSby1vU7pChjK32e9hgac4M+VY5QdB04t89/1O/w1cDnyilFU=')
+
 #Channel Secret
-handler = WebhookHandler('57fc53ff7d035209b3c30dc8c096b0a1')
+handler = WebhookHandler('4e3fbbd02286f97fcc13dab2dd81545c')
 
 # def detect_intent_texts(project_id, session_id, texts, language_code):
 #     session_client = dialogflow.SessionsClient()
@@ -62,15 +63,21 @@ def callback():
     return 'OK'
 
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message = TextMessage)
 def handle_message(event):
     # Response = detect_intent_texts(project_id, session_id, str(texts), language_code)
-    msg = event.message.text
-    # print(type(msg))
-    msg = msg.encode('utf-8') 
-    
+    # msg = event.message.text
+    # # print(type(msg))
+    # msg = msg.encode('utf-8') 
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.message.text))
-    # print(event.message.text)
+
+@handler.add(MessageEvent, message = TextMessage)    
+def handle_message(event):
+    if event.message.text == "==":
+        line_bot_api.reply_message(event.reply_token,TextSendMessage("2019年終於有人知道==不要加空格"))
+    else:
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text = event.message.text))
+
 
 # @handler.add(MessageEvent)
 # def hello(event):
